@@ -7,9 +7,9 @@ async function getDate() {
   console.log(date);
 }
 
-const fetcher = (url) => fetch(url).then((res) => res.text());
+const fetcher = (url) => fetch(url).then((res) => res.json());
 export default function Home({ props }) {
-  const { data, error } = useSWR("/api/date", fetcher);
+  const { data, error } = useSWR("/api/hello", fetcher);
   return (
     <div className={styles.container}>
       <Head>
