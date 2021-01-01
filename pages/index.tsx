@@ -1,15 +1,20 @@
+import absoluteUrl from "next-absolute-url";
+import { GetServerSideProps } from "next";
+import { InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import useSWR from "swr";
 import styles from "../styles/Home.module.css";
 
-async function getDate() {
-  let date = await fetch("/api/date").then((r) => r.toString());
-  console.log(date);
+export interface Idata {
+  name: string;
 }
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
-export default function Home({ props }) {
-  const { data, error } = useSWR("/api/hello", fetcher);
+async function fetcher(url): Promise<Idata | any> {
+  return fetch(url).then((res) => res.json());
+}
+
+export default function Home(props: Idata) {
+  const { data, error } = useSWR<Idata>("/api/hello", fetcher);
   return (
     <div className={styles.container}>
       <Head>
@@ -68,7 +73,17 @@ export default function Home({ props }) {
           <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
         </a>
       </footer>
-      <div className="bg-red-500">{data ? data : "loading"}</div>
+      <div className="bg-red-500">{data ? data.name : props.name}</div>
+      <div className="bg-red-500">{props.name}</div>
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // Pass data to the page via propconst
+  const { origin } = absoluteUrl(context.req, "localhost:3000");
+  const resp = await fetch(`${origin}/api/hello`);
+  const data: Idata = await resp.json();
+  return { props: data };
+  // ...
+};
